@@ -4,6 +4,10 @@
 #include <random>
 #include <typeinfo>
 #include <algorithm>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <json/json.h>
+#include <thread>
 
 
 #include "imgui.h"
@@ -16,6 +20,9 @@
 #include "Point.h"
 #include "SpriteManager.h"
 #include "Sprite.h"
+
+#pragma comment(lib, "rpcrt4.lib") 
+#pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
 
@@ -31,14 +38,14 @@ int batch = 0;
 int ballsSpawned = 0;
 int currBatch = 0;
 
-Point startBall = {0, 0};
-Point endBall = {0, 0};
+Point startBall = { 0, 0 };
+Point endBall = { 0, 0 };
 
 pair<float, float> angle;
 pair<float, float> velocity;
 
-Point wallPoint1 = {0, 0};
-Point wallPoint2 = {0, 0};
+Point wallPoint1 = { 0, 0 };
+Point wallPoint2 = { 0, 0 };
 
 const int targetFPS = 60;
 const float targetFrameTime = 1.0f / targetFPS;
@@ -76,7 +83,7 @@ void toggleExplorerMode() {
 
 // Function to adjust camera movement based on keyboard input
 void keyboard(unsigned char key, int x, int y) {
-    if(!isExplorerMode){
+    if (!isExplorerMode) {
         return;
     }
 
@@ -87,48 +94,48 @@ void keyboard(unsigned char key, int x, int y) {
     float spriteX = currentSprite.getX();
     float spriteY = currentSprite.getY();
     switch (key) {
-    case 'w': 
+    case 'w':
 
-        if(spriteY >= ballsViewportHeight){
-            currentSprite.setY(ballsViewportHeight);            
+        if (spriteY >= ballsViewportHeight) {
+            currentSprite.setY(ballsViewportHeight);
             break;
         }
-        currentSprite.moveUp(cameraSpeed); 
+        currentSprite.moveUp(cameraSpeed);
         // cout << currentSprite.getX() << ", " << currentSprite.getY() << endl;
         break;
-    case 's': 
-        
-        if(spriteY <= 0){
+    case 's':
+
+        if (spriteY <= 0) {
             currentSprite.setY(0);
             break;
         }
-        
-        currentSprite.moveDown(cameraSpeed); 
+
+        currentSprite.moveDown(cameraSpeed);
         break;
-    case 'a': 
-        if(spriteX <= 0){
+    case 'a':
+        if (spriteX <= 0) {
             currentSprite.setX(0);
             break;
         }
-        if(spriteX >= ballsViewportWidth - 200){
+        if (spriteX >= ballsViewportWidth - 200) {
             currentSprite.moveLeft(cameraSpeed * 2);
             break;
         }
-        currentSprite.moveLeft(cameraSpeed); 
+        currentSprite.moveLeft(cameraSpeed);
         break;
-    case 'd': 
-        if(spriteX >= ballsViewportWidth){
+    case 'd':
+        if (spriteX >= ballsViewportWidth) {
             currentSprite.setX(ballsViewportWidth);
             break;
         }
 
-        if(spriteX >= ballsViewportWidth - 200){
+        if (spriteX >= ballsViewportWidth - 200) {
             currentSprite.moveRight(cameraSpeed * 2);
             break;
         }
 
-        
-        currentSprite.moveRight(cameraSpeed); 
+
+        currentSprite.moveRight(cameraSpeed);
         break;
     }
     glutPostRedisplay();
@@ -199,7 +206,7 @@ void drawBorderLines(float lineWidth, float borderWidth, int numLines) {
     glPopMatrix();
 }
 
-static void sliderFloat(string label, float *var, float maxValue, float minValue = 0.0f)
+static void sliderFloat(string label, float* var, float maxValue, float minValue = 0.0f)
 {
 
     ImGui::Text("%s", label.c_str());
@@ -221,7 +228,7 @@ static void sliderFloat(string label, float *var, float maxValue, float minValue
     ImGui::Spacing();
 }
 
-static void sliderInt(string label, int *var, int maxValue)
+static void sliderInt(string label, int* var, int maxValue)
 {
     ImGui::Text("%s", label.c_str());
     ImGui::Separator();
@@ -251,7 +258,7 @@ void display()
     // Define the viewport and scissor box for the balls section
     GLint ballsViewportX = 0 - static_cast<int>(backgroundOffsetX);
     GLint ballsViewportY = 220 - static_cast<int>(backgroundOffsetY);
-    
+
 
     glEnable(GL_SCISSOR_TEST);
     glScissor(ballsViewportX, ballsViewportY, ballsViewportWidth, ballsViewportHeight);
@@ -270,27 +277,27 @@ void display()
 
     if (isExplorerMode) {
 
-            drawBorderLines(20.0f, 20.0f, 100);
-            Sprite& mainSprite = SpriteManager::getSprites().front();
-            float centerX = mainSprite.getX() - peripheryWidth / 2.5f;
-            float centerY = mainSprite.getY() - peripheryHeight / 2.5f;
-            float cameraX = mainSprite.getX();
-            float cameraY = mainSprite.getY();
+        drawBorderLines(20.0f, 20.0f, 100);
+        Sprite& mainSprite = SpriteManager::getSprites().front();
+        float centerX = mainSprite.getX() - peripheryWidth / 2.5f;
+        float centerY = mainSprite.getY() - peripheryHeight / 2.5f;
+        float cameraX = mainSprite.getX();
+        float cameraY = mainSprite.getY();
 
-            cout << cameraX << endl;
+        cout << cameraX << endl;
 
-            float leftBoundary = cameraX - peripheryWidth / zoomFactor;
-            float rightBoundary = cameraX + peripheryWidth / zoomFactor;
-            float topBoundary = cameraY + peripheryHeight / zoomFactor;
-            float bottomBoundary = cameraY - peripheryHeight / zoomFactor;
+        float leftBoundary = cameraX - peripheryWidth / zoomFactor;
+        float rightBoundary = cameraX + peripheryWidth / zoomFactor;
+        float topBoundary = cameraY + peripheryHeight / zoomFactor;
+        float bottomBoundary = cameraY - peripheryHeight / zoomFactor;
 
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
 
-            gluOrtho2D(leftBoundary, rightBoundary, bottomBoundary, topBoundary);
+        gluOrtho2D(leftBoundary, rightBoundary, bottomBoundary, topBoundary);
 
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
     }
 
     BallManager::drawBalls();
@@ -301,7 +308,7 @@ void display()
     glDisable(GL_SCISSOR_TEST);
 
     // Reset the viewport to the full window size for UI rendering
-    ImGuiIO &io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     glViewport(0, 0, (GLsizei)io.DisplaySize.x, (GLsizei)io.DisplaySize.y);
 
     // Start the Dear ImGui frame and render UI
@@ -440,7 +447,7 @@ void display()
                 isExplorerMode = !isExplorerMode; // Toggle the explorer mode state
             }
         }
-        
+
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
@@ -460,7 +467,7 @@ void display()
 
 }
 
-void update(int value){
+void update(int value) {
     static int lastTime = glutGet(GLUT_ELAPSED_TIME);
     static int frameCount = 0; // Count of frames since the last FPS calculation
     static float lastFpsTime = 0.0f; // Last time the FPS was updated
@@ -501,7 +508,7 @@ void update(int value){
 
     while (accumulator >= targetFrameTime)
     {
-        BallManager::updateBalls(deltaTime); // Update all balls with the time elapsed
+        //BallManager::updateBalls(deltaTime); // Update all balls with the time elapsed
         accumulator -= targetFrameTime;
     }
 
@@ -521,9 +528,129 @@ void update(int value){
     glutTimerFunc(delay, update, 0); // Adjust the delay dynamically based on the frame processing time
 }
 
-int main(int argc, char **argv)
+
+static int connectToServer() {
+    WSADATA wsaData;
+    SOCKET sock = INVALID_SOCKET;
+    struct sockaddr_in server;
+
+    // Initialize Winsock
+    int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (result != 0)
+    {
+        std::cerr << "WSAStartup failed: " << result << std::endl;
+        return 1;
+    }
+
+    // Create the socket
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET)
+    {
+        std::cerr << "Socket creation failed with error: " << WSAGetLastError() << std::endl;
+        WSACleanup();
+        return 1;
+    }
+
+    if (inet_pton(AF_INET, "127.0.0.1", &server.sin_addr) <= 0)
+    {
+        std::cerr << "Invalid address/ Address not supported \n";
+        closesocket(sock);
+        WSACleanup();
+        return 1;
+    }
+
+    server.sin_family = AF_INET;
+    server.sin_port = htons(4000);
+
+    if (connect(sock, (struct sockaddr*)&server, sizeof(server)) < 0)
+    {
+        std::cerr << "Connect failed with error.\n";
+        closesocket(sock);
+        WSACleanup();
+        return 1;
+    }
+
+    std::cout << "Connected to server.\n";
+
+    const int RECV_BUF_SIZE = 4096;
+
+    char recvbuf[RECV_BUF_SIZE];
+    int totalReceived = 0;
+
+    while (true) {
+
+        //int recvbuflen = sizeof(recvbuf); // Update buffer size
+        int bytesReceived = recv(sock, recvbuf, RECV_BUF_SIZE, 0);
+        cout << bytesReceived << ", " << recvbuf << endl;
+        if (bytesReceived > 0) {
+            //totalReceived += bytesReceived;
+            recvbuf[bytesReceived] = '\0';
+            //std::cout << "Received: " << recvbuf << std::endl;
+
+            Json::Value root;
+            Json::Reader reader;
+
+            //if (iResult == recvbuflen) {
+            //    // Received buffer is full, allocate a larger buffer
+            //    char* newBuf = new char[recvbuflen * 2]; // Double the size
+            //    memcpy(newBuf, recvbuf, recvbuflen);
+            //    delete[] recvbuf;
+            //    recvbuf = newBuf;
+            //    recvbuflen *= 2; // Update buffer length
+            //}
+
+
+            if (!reader.parse(recvbuf, recvbuf + bytesReceived, root)) {
+                std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
+                continue; // Skip parsing errors and continue receiving data
+            }
+            else {
+                //std::cout << root.isArray() << std::endl;
+
+                if (root.isArray()) {
+                    BallManager::clearBalls();
+                    for (int i = 0; i < root.size(); ++i) {
+                        //std::cout << root[i]["x"] << std::endl;
+                        Ball ball = Ball(root[i]["x"].asFloat(), root[i]["y"].asFloat(), root[i]["velocity"].asFloat(), root[i]["angle"].asFloat());
+                        BallManager::addBall(ball);
+                        //BallManager::addBall(Ball();
+                        //std::string item = root[i].asString();
+                        //std::cout << "Item " << i + 1 << ": " << item << std::endl;
+                    }
+                }
+
+                /*
+                    else {
+                        std::cout << "Invalid JSON format: Expected array" << std::endl;
+                    }*/
+            }
+
+
+
+        }
+        else if (bytesReceived == 0) {
+            std::cout << "Connection closed by server" << std::endl;
+            break; // Exit loop when server closes the connection
+        }
+        else {
+            std::cout << "recv failed: " << WSAGetLastError() << std::endl;
+            break; // Exit loop on receive error
+        }
+    }
+
+    // Existing code ...
+
+
+    closesocket(sock);
+    WSACleanup();
+
+}
+
+
+int main(int argc, char** argv)
 {
 
+    std::thread serverThread(connectToServer);
 
     glutInit(&argc, argv);
 #ifdef __FREEGLUT_EXT_H__
@@ -539,7 +666,7 @@ int main(int argc, char **argv)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     (void)io;
 
     ImGui_ImplGLUT_InstallFuncs();
@@ -559,16 +686,17 @@ int main(int argc, char **argv)
 
     ImGui_ImplGLUT_InstallFuncs();
 
-    spriteManager.addSprites(Sprite(0,0));
+    spriteManager.addSprites(Sprite(0, 0));
     // Point p1 = {0, 0};
     // Point p2 = {0, 720};
     // Wall w = Wall(p1, p2);
     // BallManager::addWall(w);
- 
+
     glutKeyboardFunc(keyboard);
 
     // Main loop
     glutMainLoop();
+    serverThread.join();
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

@@ -110,3 +110,7 @@ void BallManager::drawWalls() {
 vector<Ball> BallManager::getBalls() {
     return balls;
 }
+
+void BallManager::clearBalls() {
+    balls.clear();
+}

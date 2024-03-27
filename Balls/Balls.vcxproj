@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\freeglut\include;C:\Program Files\Common Files\MSVC\freeglut\include\;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\json\;.\vendor\freeglut\include;C:\Program Files\Common Files\MSVC\freeglut\include\;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\freeglut\include;C:\Program Files\Common Files\MSVC\freeglut\include\;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\json\;.\vendor\freeglut\include;C:\Program Files\Common Files\MSVC\freeglut\include\;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,7 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\freeglut\include;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;%(AdditionalIncludeDirectories);.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\json\;.\vendor\freeglut\include;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;%(AdditionalIncludeDirectories);.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\freeglut\include;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;%(AdditionalIncludeDirectories);.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\vendor\imgui\;.\vendor\imgui\backends;.\vendor\json\;.\vendor\freeglut\include;.\vendor\freeglut\include;.\vendor\imgui;.\vendor\imgui\backends;%(AdditionalIncludeDirectories);.\vendor\imgui;.\vendor\imgui\backends;.\vendor\freeglut\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -167,6 +167,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\jsoncpp\dist\jsoncpp.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="BallManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -181,6 +182,8 @@
     <ClCompile Include="vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\jsoncpp\dist\json\json-forwards.h" />
+    <ClInclude Include="..\..\jsoncpp\dist\json\json.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="BallManager.h" />
     <ClInclude Include="Point.h" />

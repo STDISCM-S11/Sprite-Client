@@ -16,6 +16,7 @@ public:
     static void addBallsAngle(int n, Point start, float velocity, float startAngle, float endAngle, int startSpawn, int endSpawn);
     static void addBallsVelocity(int n, Point position, float startVelocity, float endVelocity, float angle, int startSpawn, int endSpawn);
     static vector<Ball> getBalls();
+    static void clearBalls();
 
 private:
     static vector<Ball> balls;
