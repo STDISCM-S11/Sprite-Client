@@ -170,6 +170,8 @@
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="BallManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="vendor\imgui\backends\imgui_impl_glut.cpp" />
     <ClCompile Include="vendor\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="vendor\imgui\imgui.cpp" />
@@ -183,6 +185,8 @@
     <ClInclude Include="BallManager.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Sprite.h" />
+    <ClInclude Include="SpriteManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Balls.rc" />

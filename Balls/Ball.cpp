@@ -73,3 +73,16 @@ void Ball::normalizeVelocity() {
     dx = (dx / velocityMagnitude) * velocity;
     dy = (dy / velocityMagnitude) * velocity;
 }
+
+void Ball::drawScaled(float scaleFactor) {
+    glBegin(GL_TRIANGLE_FAN);
+    glColor3ub(227, 151, 116); // Set ball color
+    for (int i = 0; i <= 20; i++) {
+        float angle = 2.0f * PI * float(i) / float(20); // Calculate the angle
+        float xComponent = (radius * scaleFactor) * cosf(angle); // Calculate the x component with scaling
+        float yComponent = (radius * scaleFactor) * sinf(angle); // Calculate the y component with scaling
+
+        glVertex2f(x + xComponent, y + yComponent);
+    }
+    glEnd();
+}

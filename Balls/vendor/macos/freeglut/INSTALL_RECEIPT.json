@@ -1,0 +1,151 @@
+{
+  "homebrew_version": "4.1.13-43-gb4274c8",
+  "used_options": [
+
+  ],
+  "unused_options": [
+
+  ],
+  "built_as_bottle": true,
+  "poured_from_bottle": true,
+  "loaded_from_api": true,
+  "installed_as_dependency": false,
+  "installed_on_request": true,
+  "changed_files": [
+    "lib/cmake/FreeGLUT/FreeGLUTTargets.cmake",
+    "lib/pkgconfig/glut.pc"
+  ],
+  "time": 1709710846,
+  "source_modified_time": 1665159171,
+  "compiler": "clang",
+  "aliases": [
+
+  ],
+  "runtime_dependencies": [
+    {
+      "full_name": "xorgproto",
+      "version": "2023.2",
+      "revision": 0,
+      "pkg_version": "2023.2",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxau",
+      "version": "1.0.11",
+      "revision": 0,
+      "pkg_version": "1.0.11",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxdmcp",
+      "version": "1.1.5",
+      "revision": 0,
+      "pkg_version": "1.1.5",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxcb",
+      "version": "1.16.1",
+      "revision": 0,
+      "pkg_version": "1.16.1",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libx11",
+      "version": "1.8.7",
+      "revision": 0,
+      "pkg_version": "1.8.7",
+      "declared_directly": true
+    },
+    {
+      "full_name": "libxext",
+      "version": "1.3.6",
+      "revision": 0,
+      "pkg_version": "1.3.6",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxfixes",
+      "version": "6.0.1",
+      "revision": 0,
+      "pkg_version": "6.0.1",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxi",
+      "version": "1.8.1",
+      "revision": 0,
+      "pkg_version": "1.8.1",
+      "declared_directly": true
+    },
+    {
+      "full_name": "libxrender",
+      "version": "0.9.11",
+      "revision": 0,
+      "pkg_version": "0.9.11",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxrandr",
+      "version": "1.5.4",
+      "revision": 0,
+      "pkg_version": "1.5.4",
+      "declared_directly": true
+    },
+    {
+      "full_name": "libxxf86vm",
+      "version": "1.1.5",
+      "revision": 0,
+      "pkg_version": "1.1.5",
+      "declared_directly": true
+    },
+    {
+      "full_name": "expat",
+      "version": "2.6.1",
+      "revision": 0,
+      "pkg_version": "2.6.1",
+      "declared_directly": false
+    },
+    {
+      "full_name": "libxdamage",
+      "version": "1.1.6",
+      "revision": 0,
+      "pkg_version": "1.1.6",
+      "declared_directly": false
+    },
+    {
+      "full_name": "gettext",
+      "version": "0.22.5",
+      "revision": 0,
+      "pkg_version": "0.22.5",
+      "declared_directly": false
+    },
+    {
+      "full_name": "mesa",
+      "version": "24.0.2",
+      "revision": 0,
+      "pkg_version": "24.0.2",
+      "declared_directly": true
+    }
+  ],
+  "source": {
+    "spec": "stable",
+    "versions": {
+      "stable": "3.4.0",
+      "head": null,
+      "version_scheme": 0
+    },
+    "path": "/opt/homebrew/Library/Taps/homebrew/homebrew-core/Formula/f/freeglut.rb",
+    "tap_git_head": null,
+    "tap": "homebrew/core"
+  },
+  "arch": "arm64",
+  "built_on": {
+    "os": "Macintosh",
+    "os_version": "macOS 14",
+    "cpu_family": "dunno",
+    "xcode": "15.0",
+    "clt": "15.0.0.0.1.1694021235",
+    "preferred_perl": "5.34"
+  }
+}

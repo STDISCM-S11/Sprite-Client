@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "clang++",
+            "args": [
+                "-std=c++17",
+                "-stdlib=libc++",
+                "${workspaceFolder}/*.cpp",
+                "-o", "${workspaceFolder}/main",
+                "-I${workspaceFolder}/vendor/macos/freeglut/include", // Include directory for SFML headers
+                "-L${workspaceFolder}/vendor/macos/lib" // Library directory for SFML
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}

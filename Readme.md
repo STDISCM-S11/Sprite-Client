@@ -2,7 +2,7 @@
 
 STDISCM Problem Set # 1
 
-Authors: Faith Griffin and Tyrone Sta. Maria
+Authors: Janine Chua Ching, Ayisha Dytoc, Faith Griffin, and Tyrone Sta. Maria
 
 This project is a particle simulator that utilizes concurrent programming alongside C++ and OpenGL.
 
@@ -22,7 +22,13 @@ git clone https://github.com/TyroneStaMaria/stdiscm-balls-project.git
 
 or download as a ZIP file and extract it
 
-## Step 2: Open the Project
+## Step 2: Checkout Branch
+
+```
+git checkout problem-set-2-final
+```
+
+## Step 3: Open the Project
 
 Using Visual Studio
 
@@ -35,7 +41,7 @@ If you prefer not to use the solution file:
 2. Select `File > Open > Project/Solution` and navigate to the `Balls/` directory.
 3. Choose `Balls.sln` to load the project.
 
-## Step 3: Build and Run
+## Step 4: Build and Run
 
 To build and run the project:
 
@@ -48,4 +54,4 @@ Alternatively, you can use `F5` to run with debugging enabled if you need to tro
 
 Here is a demonstration of how to use the particle simulator.
 
-https://drive.google.com/file/d/1Z4VnUZCtM8h1md4B7-Ggk-xIhArg5P0S/view?usp=drive_link
+[https://drive.google.com/file/d/16FjNWlM0IkYmioYtVePzI-pZ3ia-SSsB/view?usp=sharing](https://drive.google.com/file/d/16FjNWlM0IkYmioYtVePzI-pZ3ia-SSsB/view?usp=sharing)https://drive.google.com/file/d/16FjNWlM0IkYmioYtVePzI-pZ3ia-SSsB/view?usp=sharing

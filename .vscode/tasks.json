@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "cppbuild",
+            "command": "clang++",
+            "args": [
+                "-std=c++17",
+                "-stdlib=libc++",
+                "-fdiagnostics-color=always",
+                "${workspaceFolder}/Balls/*.cpp",
+                "${workspaceFolder}/Balls/vendor/imgui/*.cpp",
+                "${workspaceFolder}/Balls/vendor/imgui/backends/*.cpp",
+                "-o",
+                "${workspaceFolder}/Balls/main",
+                "-I${workspaceFolder}/Balls",
+                "-I${workspaceFolder}/Balls/vendor/macos/freeglut/include",
+                "-I${workspaceFolder}/Balls/vendor/imgui",
+                "-I${workspaceFolder}/Balls/vendor/imgui/backends",
+                "-L${workspaceFolder}/Balls/vendor/macos/freeglut/lib",
+                "${workspaceFolder}/Balls/vendor/macos/freeglut/lib/libglut.dylib",
+                "-Wno-deprecated",
+                "-framework",
+                "GLUT",
+                "-framework",
+                "OpenGL"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}

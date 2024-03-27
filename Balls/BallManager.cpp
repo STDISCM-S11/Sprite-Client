@@ -75,25 +75,6 @@ void BallManager::updateBalls(float deltaTime) {
             float nextY = balls[i].y + balls[i].dy * deltaTime;
             balls[i].checkCanvasCollision();
 
-
-            for (const auto& wall : walls) {
-
-                float temp = (balls[i].x - nextX) * (wall.point1.y - wall.point2.y) - (balls[i].y - nextY) * (wall.point1.x - wall.point2.x);
-
-                if (temp != 0)
-                {
-                    double t = ((balls[i].x - wall.point1.x) * (wall.point1.y - wall.point2.y) - (balls[i].y - wall.point1.y) * (wall.point1.x - wall.point2.x)) / temp;
-                    double u = -((balls[i].x - nextX) * (balls[i].y - wall.point1.y) - (balls[i].y - nextY) * (balls[i].x - wall.point1.x)) / temp;
-
-                    collision = t >= 0 && t <= 1 && u >= 0 && u <= 1;
-                }
-
-                if (collision) {
-                    // Invert direction only if collision is detected
-                    balls[i].invertDirection();
-                }
-            }
-
             // Move the ball after checking for collisions
             balls[i].move(deltaTime);
         }
@@ -108,11 +89,7 @@ void BallManager::updateBalls(float deltaTime) {
     for (auto& thread : threads) {
         thread.join(); // Wait for all threads to finish
     }
-
-    
 }
-
-
 
 void BallManager::drawBalls() {
     for (auto& ball : balls) {
