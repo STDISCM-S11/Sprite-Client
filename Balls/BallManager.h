@@ -17,9 +17,10 @@ public:
     static void addBallsVelocity(int n, Point position, float startVelocity, float endVelocity, float angle, int startSpawn, int endSpawn);
     static vector<Ball> getBalls();
     static void clearBalls();
+    static vector<Ball> balls;
+
 
 private:
-    static vector<Ball> balls;
     static vector<Wall> walls;
 };
 

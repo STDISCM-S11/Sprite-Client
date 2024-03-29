@@ -8,7 +8,7 @@
 #include <ws2tcpip.h>
 #include <json/json.h>
 #include <thread>
-
+#include <mutex>
 
 #include "imgui.h"
 
@@ -76,6 +76,8 @@ const float peripheryHeight = peripheryHeightTiles * peripheryTileSize;
 
 GLsizei ballsViewportWidth = 1280;
 GLsizei ballsViewportHeight = 720;
+
+std::mutex ballMutex;
 
 void toggleExplorerMode() {
     isExplorerMode = !isExplorerMode;
@@ -300,7 +302,10 @@ void display()
         glLoadIdentity();
     }
 
+    ballMutex.lock();
     BallManager::drawBalls();
+    ballMutex.unlock();
+
     BallManager::drawWalls();
     spriteManager.drawSprites(cameraX, cameraY, isExplorerMode);
 
@@ -453,7 +458,9 @@ void display()
         ImGui::Spacing();
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / calculatedFrameRate, calculatedFrameRate);
+        ballMutex.lock();
         ImGui::Text("Number of balls: %zu", BallManager::getBalls().size());
+        ballMutex.unlock();
         ImGui::GetFont()->Scale = oldSize;
         ImGui::PopFont();
 
@@ -572,59 +579,45 @@ static int connectToServer() {
 
     std::cout << "Connected to server.\n";
 
-    const int RECV_BUF_SIZE = 4096;
+   /* const int RECV_BUF_SIZE = 4096;
 
     char recvbuf[RECV_BUF_SIZE];
-    int totalReceived = 0;
+    int totalReceived = 0;*/
+
+    std::string recvbuf;
+    std::stringstream ss;
 
     while (true) {
 
         //int recvbuflen = sizeof(recvbuf); // Update buffer size
-        int bytesReceived = recv(sock, recvbuf, RECV_BUF_SIZE, 0);
-        cout << bytesReceived << ", " << recvbuf << endl;
-        if (bytesReceived > 0) {
-            //totalReceived += bytesReceived;
-            recvbuf[bytesReceived] = '\0';
-            //std::cout << "Received: " << recvbuf << std::endl;
+        int bytesReceived = recv(sock, recvbuf.data(), recvbuf.capacity(), 0);
+        //cout << bytesReceived << ", " << recvbuf << endl;
 
+        recvbuf.resize(bytesReceived);
+        recvbuf.push_back('\0');
+        if (bytesReceived > 0) {
+            
+            ss.str(recvbuf);
             Json::Value root;
             Json::Reader reader;
+            //std::cout << recvbuf << endl;
 
-            //if (iResult == recvbuflen) {
-            //    // Received buffer is full, allocate a larger buffer
-            //    char* newBuf = new char[recvbuflen * 2]; // Double the size
-            //    memcpy(newBuf, recvbuf, recvbuflen);
-            //    delete[] recvbuf;
-            //    recvbuf = newBuf;
-            //    recvbuflen *= 2; // Update buffer length
-            //}
-
-
-            if (!reader.parse(recvbuf, recvbuf + bytesReceived, root)) {
-                std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
+            if (!reader.parse(ss, root, false)) {
+                //std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
                 continue; // Skip parsing errors and continue receiving data
             }
-            else {
-                //std::cout << root.isArray() << std::endl;
 
-                if (root.isArray()) {
-                    BallManager::clearBalls();
-                    for (int i = 0; i < root.size(); ++i) {
-                        //std::cout << root[i]["x"] << std::endl;
-                        Ball ball = Ball(root[i]["x"].asFloat(), root[i]["y"].asFloat(), root[i]["velocity"].asFloat(), root[i]["angle"].asFloat());
-                        BallManager::addBall(ball);
-                        //BallManager::addBall(Ball();
-                        //std::string item = root[i].asString();
-                        //std::cout << "Item " << i + 1 << ": " << item << std::endl;
-                    }
+            if (root.isArray()) {
+                ballMutex.lock();
+                BallManager::clearBalls();
+                for (int i = 0; i < root.size(); ++i) {
+                    Ball ball = Ball(root[i]["x"].asFloat(), root[i]["y"].asFloat(), root[i]["velocity"].asFloat(), root[i]["angle"].asFloat());
+                    BallManager::addBall(ball);
                 }
-
-                /*
-                    else {
-                        std::cout << "Invalid JSON format: Expected array" << std::endl;
-                    }*/
+                ballMutex.unlock();
             }
 
+            recvbuf.clear();
 
 
         }
@@ -638,7 +631,6 @@ static int connectToServer() {
         }
     }
 
-    // Existing code ...
 
 
     closesocket(sock);
