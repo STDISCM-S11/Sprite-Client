@@ -679,6 +679,7 @@ int main(int argc, char** argv)
     ImGui_ImplGLUT_InstallFuncs();
 
     spriteManager.addSprites(Sprite(0, 0));
+    spriteManager.addSprites(Sprite(40, 40));
     // Point p1 = {0, 0};
     // Point p2 = {0, 720};
     // Wall w = Wall(p1, p2);

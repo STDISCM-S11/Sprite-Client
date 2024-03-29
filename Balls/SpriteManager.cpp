@@ -39,6 +39,26 @@ void SpriteManager::drawSprites(float cameraX, float cameraY, bool isExplorerMod
         
         /// Since we're already centered on the sprite, it should be drawn at the camera's origin
         mainSprite.draw(0, 0);
+
+        for (auto& sprite : sprites) {
+            if (&sprite != &mainSprite) {
+                float relX = sprite.getX() - mainSprite.getX();
+                float relY = sprite.getY() - mainSprite.getY();
+
+                if (relX >= -peripheryWidth / 2.0f &&
+                    relX <= peripheryWidth / 2.0f &&
+                    relY >= -peripheryHeight / 2.0f &&
+                    relY <= peripheryHeight / 2.0f) {
+
+                    float drawX = relX + peripheryWidth / 2.0f;
+                    float drawY = relY + peripheryHeight / 2.0f;
+
+                    // Draw the sprite
+                    sprite.draw(drawX, drawY);
+                }
+            }
+        }
+
     }
     else {
         // Standard drawing code for non-explorer mode
