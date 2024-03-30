@@ -64,7 +64,7 @@ float backgroundOffsetY = 0.0f;
 float cameraX = 0.0f;
 float cameraY = 0.0f;
 
-bool isExplorerMode = false;
+bool isExplorerMode = true;
 const float tileSize = 1000.0f; // Example tile size, adjust based on your game's scale
 SpriteManager spriteManager = SpriteManager();
 float zoomFactor = 2.0f; // Example zoom factor, adjust based on your desired zoom level
@@ -73,6 +73,8 @@ const int peripheryWidthTiles = 33; // Number of horizontal tiles
 const int peripheryHeightTiles = 19; // Number of vertical tiles
 const float peripheryWidth = peripheryWidthTiles * peripheryTileSize;
 const float peripheryHeight = peripheryHeightTiles * peripheryTileSize;
+
+Sprite &mainSprite;
 
 GLsizei ballsViewportWidth = 1280;
 GLsizei ballsViewportHeight = 720;
@@ -336,10 +338,10 @@ void display()
 
         // Toggle between Explorer and Developer Mode
         if (isExplorerMode) {
-            ImGui::Text("Controls");
-            if (ImGui::Button("Developer Mode")) {
-                isExplorerMode = false; // Switch to Developer Mode
-            }
+            // ImGui::Text("Controls");
+            // if (ImGui::Button("Developer Mode")) {
+            //     isExplorerMode = false; // Switch to Developer Mode
+            // }
         }
         else {
 
@@ -584,6 +586,35 @@ static int connectToServer() {
     char recvbuf[RECV_BUF_SIZE];
     int totalReceived = 0;*/
 
+    std::thread receiveBallThread(receiveBallData);
+    std::thread sendSpriteThread(sendSpriteData);    
+
+    closesocket(sock);
+    WSACleanup();
+
+}
+
+void sendSpriteData(){
+    Json::Value data;
+
+
+    while(true){
+        data.clear();
+
+        // Sprite& mainSprite = SpriteManager::getSprites().front();
+        data["x"] = mainSprite.getX();
+        data["y"] = mainSprite.getY();
+
+        Json::StreamWriterBuilder builder;
+        std::string json_string = Json::writeString(builder, data);
+        send(sock, json_string.c_str(), json_string.length(), 0);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    }
+}
+
+void receiveBallData(){
     std::string recvbuf;
     std::stringstream ss;
 
@@ -630,12 +661,6 @@ static int connectToServer() {
             break; // Exit loop on receive error
         }
     }
-
-
-
-    closesocket(sock);
-    WSACleanup();
-
 }
 
 
@@ -678,7 +703,9 @@ int main(int argc, char** argv)
 
     ImGui_ImplGLUT_InstallFuncs();
 
-    spriteManager.addSprites(Sprite(0, 0));
+    mainSprite = &Sprite(0, 0);
+
+    spriteManager.addSprites(mainSprite);
     spriteManager.addSprites(Sprite(40, 40));
     // Point p1 = {0, 0};
     // Point p2 = {0, 720};
