@@ -74,7 +74,7 @@ const int peripheryHeightTiles = 19; // Number of vertical tiles
 const float peripheryWidth = peripheryWidthTiles * peripheryTileSize;
 const float peripheryHeight = peripheryHeightTiles * peripheryTileSize;
 
-Sprite &mainSprite;
+//Sprite* mainSprite = nullptr;
 
 GLsizei ballsViewportWidth = 1280;
 GLsizei ballsViewportHeight = 720;
@@ -93,53 +93,55 @@ void keyboard(unsigned char key, int x, int y) {
 
     float cameraSpeed = 5.0f;
 
-    Sprite& currentSprite = SpriteManager::getSprites().front(); // Assuming the controlled sprite is the first one
+    //Sprite& currentSprite = SpriteManager::getSprites().front(); // Assuming the controlled sprite is the first one
 
-    float spriteX = currentSprite.getX();
-    float spriteY = currentSprite.getY();
+    Sprite* mainSprite = spriteManager.getMainSprite();
+
+    float spriteX = (*mainSprite).getX();
+    float spriteY = (*mainSprite).getY();
     switch (key) {
     case 'w':
 
         if (spriteY >= ballsViewportHeight) {
-            currentSprite.setY(ballsViewportHeight);
+            (*mainSprite).setY(ballsViewportHeight);
             break;
         }
-        currentSprite.moveUp(cameraSpeed);
+        (*mainSprite).moveUp(cameraSpeed);
         // cout << currentSprite.getX() << ", " << currentSprite.getY() << endl;
         break;
     case 's':
 
         if (spriteY <= 0) {
-            currentSprite.setY(0);
+            (*mainSprite).setY(0);
             break;
         }
 
-        currentSprite.moveDown(cameraSpeed);
+        (*mainSprite).moveDown(cameraSpeed);
         break;
     case 'a':
         if (spriteX <= 0) {
-            currentSprite.setX(0);
+            (*mainSprite).setX(0);
             break;
         }
         if (spriteX >= ballsViewportWidth - 200) {
-            currentSprite.moveLeft(cameraSpeed * 2);
+            (*mainSprite).moveLeft(cameraSpeed * 2);
             break;
         }
-        currentSprite.moveLeft(cameraSpeed);
+        (*mainSprite).moveLeft(cameraSpeed);
         break;
     case 'd':
         if (spriteX >= ballsViewportWidth) {
-            currentSprite.setX(ballsViewportWidth);
+            (*mainSprite).setX(ballsViewportWidth);
             break;
         }
 
         if (spriteX >= ballsViewportWidth - 200) {
-            currentSprite.moveRight(cameraSpeed * 2);
+            (*mainSprite).moveRight(cameraSpeed * 2);
             break;
         }
 
 
-        currentSprite.moveRight(cameraSpeed);
+        (*mainSprite).moveRight(cameraSpeed);
         break;
     }
     glutPostRedisplay();
@@ -147,9 +149,11 @@ void keyboard(unsigned char key, int x, int y) {
 
 void drawBorderLines(float lineWidth, float borderWidth, int numLines) {
 
-    Sprite& mainSprite = SpriteManager::getSprites().front();
-    float spriteX = mainSprite.getX();
-    float spriteY = mainSprite.getY();
+    Sprite* mainSprite = spriteManager.getMainSprite();
+
+    //Sprite& mainSprite = SpriteManager::getSprites().front();
+    float spriteX = (*mainSprite).getX();
+    float spriteY = (*mainSprite).getY();
     float centerX = spriteX - peripheryWidth / 2.0f;
     float centerY = spriteY - peripheryHeight / 2.0f;
 
@@ -280,15 +284,16 @@ void display()
     glLoadIdentity();
 
     if (isExplorerMode) {
+        Sprite* mainSprite = spriteManager.getMainSprite();
 
         drawBorderLines(20.0f, 20.0f, 100);
-        Sprite& mainSprite = SpriteManager::getSprites().front();
-        float centerX = mainSprite.getX() - peripheryWidth / 2.5f;
-        float centerY = mainSprite.getY() - peripheryHeight / 2.5f;
-        float cameraX = mainSprite.getX();
-        float cameraY = mainSprite.getY();
+        //Sprite& mainSprite = SpriteManager::getSprites().front();
+        float centerX = (*mainSprite).getX() - peripheryWidth / 2.5f;
+        float centerY = (*mainSprite).getY() - peripheryHeight / 2.5f;
+        float cameraX = (*mainSprite).getX();
+        float cameraY = (*mainSprite).getY();
 
-        cout << cameraX << endl;
+        //cout << cameraX << endl;
 
         float leftBoundary = cameraX - peripheryWidth / zoomFactor;
         float rightBoundary = cameraX + peripheryWidth / zoomFactor;
@@ -538,6 +543,87 @@ void update(int value) {
 }
 
 
+void sendSpriteData(SOCKET sock) {
+    Json::Value data;
+
+    while (true) {
+        data.clear();
+        Sprite* mainSprite = spriteManager.getMainSprite();
+
+        if (!mainSprite) {
+            continue;
+        }
+
+        // Construct JSON object representing sprite position
+        data["x"] = (*mainSprite).getX();
+        data["y"] = (*mainSprite).getY();
+
+        // Convert JSON object to string
+        Json::StreamWriterBuilder builder;
+        std::string json_string = Json::writeString(builder, data);
+
+        // Send JSON data to the server
+        int bytesSent = send(sock, json_string.c_str(), json_string.length(), 0);
+        if (bytesSent == SOCKET_ERROR) {
+            std::cerr << "send failed: " << WSAGetLastError() << std::endl;
+            break; // Exit loop on send error
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
+
+void receiveBallData(SOCKET sock) {
+    std::string recvbuf;
+    std::stringstream ss;
+
+    while (true) {
+
+        //int recvbuflen = sizeof(recvbuf); // Update buffer size
+        int bytesReceived = recv(sock, recvbuf.data(), recvbuf.capacity(), 0);
+        //cout << bytesReceived << ", " << recvbuf << endl;
+
+        recvbuf.resize(bytesReceived);
+        recvbuf.push_back('\0');
+        if (bytesReceived > 0) {
+
+            ss.str(recvbuf);
+            Json::Value root;
+            Json::Reader reader;
+            //std::cout << recvbuf << endl;
+
+            if (!reader.parse(ss, root, false)) {
+                //std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
+                continue; // Skip parsing errors and continue receiving data
+            }
+
+            if (root.isArray()) {
+                ballMutex.lock();
+                BallManager::clearBalls();
+                for (int i = 0; i < root.size(); ++i) {
+                    Ball ball = Ball(root[i]["x"].asFloat(), root[i]["y"].asFloat(), root[i]["velocity"].asFloat(), root[i]["angle"].asFloat());
+                    BallManager::addBall(ball);
+                }
+                ballMutex.unlock();
+            }
+
+            recvbuf.clear();
+
+
+        }
+        else if (bytesReceived == 0) {
+            std::cout << "Connection closed by server" << std::endl;
+            break; // Exit loop when server closes the connection
+        }
+        else {
+            std::cout << "recv failed: " << WSAGetLastError() << std::endl;
+            break; // Exit loop on receive error
+        }
+    }
+}
+
+
 static int connectToServer() {
     WSADATA wsaData;
     SOCKET sock = INVALID_SOCKET;
@@ -581,87 +667,22 @@ static int connectToServer() {
 
     std::cout << "Connected to server.\n";
 
-   /* const int RECV_BUF_SIZE = 4096;
+    /* const int RECV_BUF_SIZE = 4096;
 
-    char recvbuf[RECV_BUF_SIZE];
-    int totalReceived = 0;*/
+     char recvbuf[RECV_BUF_SIZE];
+     int totalReceived = 0;*/
 
-    std::thread receiveBallThread(receiveBallData);
-    std::thread sendSpriteThread(sendSpriteData);    
+    std::thread receiveBallThread(receiveBallData, sock);
+    std::thread sendSpriteThread(sendSpriteData, sock);
 
+    //receiveBallThread.join();
+    sendSpriteThread.join();
     closesocket(sock);
     WSACleanup();
 
 }
 
-void sendSpriteData(){
-    Json::Value data;
 
-
-    while(true){
-        data.clear();
-
-        // Sprite& mainSprite = SpriteManager::getSprites().front();
-        data["x"] = mainSprite.getX();
-        data["y"] = mainSprite.getY();
-
-        Json::StreamWriterBuilder builder;
-        std::string json_string = Json::writeString(builder, data);
-        send(sock, json_string.c_str(), json_string.length(), 0);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-    }
-}
-
-void receiveBallData(){
-    std::string recvbuf;
-    std::stringstream ss;
-
-    while (true) {
-
-        //int recvbuflen = sizeof(recvbuf); // Update buffer size
-        int bytesReceived = recv(sock, recvbuf.data(), recvbuf.capacity(), 0);
-        //cout << bytesReceived << ", " << recvbuf << endl;
-
-        recvbuf.resize(bytesReceived);
-        recvbuf.push_back('\0');
-        if (bytesReceived > 0) {
-            
-            ss.str(recvbuf);
-            Json::Value root;
-            Json::Reader reader;
-            //std::cout << recvbuf << endl;
-
-            if (!reader.parse(ss, root, false)) {
-                //std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
-                continue; // Skip parsing errors and continue receiving data
-            }
-
-            if (root.isArray()) {
-                ballMutex.lock();
-                BallManager::clearBalls();
-                for (int i = 0; i < root.size(); ++i) {
-                    Ball ball = Ball(root[i]["x"].asFloat(), root[i]["y"].asFloat(), root[i]["velocity"].asFloat(), root[i]["angle"].asFloat());
-                    BallManager::addBall(ball);
-                }
-                ballMutex.unlock();
-            }
-
-            recvbuf.clear();
-
-
-        }
-        else if (bytesReceived == 0) {
-            std::cout << "Connection closed by server" << std::endl;
-            break; // Exit loop when server closes the connection
-        }
-        else {
-            std::cout << "recv failed: " << WSAGetLastError() << std::endl;
-            break; // Exit loop on receive error
-        }
-    }
-}
 
 
 int main(int argc, char** argv)
@@ -703,9 +724,11 @@ int main(int argc, char** argv)
 
     ImGui_ImplGLUT_InstallFuncs();
 
-    mainSprite = &Sprite(0, 0);
+    Sprite sprite = Sprite(0, 0);
 
-    spriteManager.addSprites(mainSprite);
+    //mainSprite = &sprite;
+    spriteManager.setMainSprite(&sprite);
+    //spriteManager.addSprites(*mainSprite);
     spriteManager.addSprites(Sprite(40, 40));
     // Point p1 = {0, 0};
     // Point p2 = {0, 720};

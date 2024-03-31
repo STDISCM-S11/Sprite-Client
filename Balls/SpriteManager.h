@@ -35,12 +35,15 @@ public:
     static void addSprites(const Sprite& sprite); // Note: Should this be static?
     void drawSprites(float cameraX, float cameraY, bool isExplorerMode); // Changed to non-static
     static vector<Sprite>& getSprites();
+    void setMainSprite(Sprite* sprite);
+    Sprite* getMainSprite();
 
     // These are no longer static
     bool explorerMode;
-    Sprite mainSprite;
+    Sprite* mainSprite;
     float pixelWidth;
     float pixelHeight;
+
 
 private:
     static vector<Sprite> sprites;
