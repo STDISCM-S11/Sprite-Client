@@ -167,7 +167,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\jsoncpp\dist\jsoncpp.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="BallManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -180,16 +179,17 @@
     <ClCompile Include="vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="vendor\json\dist\jsoncpp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\jsoncpp\dist\json\json-forwards.h" />
-    <ClInclude Include="..\..\jsoncpp\dist\json\json.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="BallManager.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteManager.h" />
+    <ClInclude Include="vendor\json\dist\json\json-forwards.h" />
+    <ClInclude Include="vendor\json\dist\json\json.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Balls.rc" />

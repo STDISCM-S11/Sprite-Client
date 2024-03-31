@@ -70,6 +70,10 @@ void SpriteManager::setMainSprite(Sprite* sprite) {
     mainSprite = sprite;
 }
 
+void SpriteManager::clearSprites() {
+    sprites.clear();
+}
+
 Sprite* SpriteManager::getMainSprite() {
     return mainSprite;
 }

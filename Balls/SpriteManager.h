@@ -37,6 +37,7 @@ public:
     static vector<Sprite>& getSprites();
     void setMainSprite(Sprite* sprite);
     Sprite* getMainSprite();
+    void clearSprites();
 
     // These are no longer static
     bool explorerMode;

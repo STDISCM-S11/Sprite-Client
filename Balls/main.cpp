@@ -80,6 +80,7 @@ GLsizei ballsViewportWidth = 1280;
 GLsizei ballsViewportHeight = 720;
 
 std::mutex ballMutex;
+std::mutex spriteMutex;
 
 void toggleExplorerMode() {
     isExplorerMode = !isExplorerMode;
@@ -94,8 +95,10 @@ void keyboard(unsigned char key, int x, int y) {
     float cameraSpeed = 5.0f;
 
     //Sprite& currentSprite = SpriteManager::getSprites().front(); // Assuming the controlled sprite is the first one
-
+    spriteMutex.lock();
     Sprite* mainSprite = spriteManager.getMainSprite();
+    spriteMutex.unlock();
+
 
     float spriteX = (*mainSprite).getX();
     float spriteY = (*mainSprite).getY();
@@ -149,7 +152,9 @@ void keyboard(unsigned char key, int x, int y) {
 
 void drawBorderLines(float lineWidth, float borderWidth, int numLines) {
 
+    spriteMutex.lock();
     Sprite* mainSprite = spriteManager.getMainSprite();
+    spriteMutex.unlock();
 
     //Sprite& mainSprite = SpriteManager::getSprites().front();
     float spriteX = (*mainSprite).getX();
@@ -284,7 +289,10 @@ void display()
     glLoadIdentity();
 
     if (isExplorerMode) {
+        spriteMutex.lock();
         Sprite* mainSprite = spriteManager.getMainSprite();
+        spriteMutex.unlock();
+
 
         drawBorderLines(20.0f, 20.0f, 100);
         //Sprite& mainSprite = SpriteManager::getSprites().front();
@@ -314,7 +322,11 @@ void display()
     ballMutex.unlock();
 
     BallManager::drawWalls();
+
+    spriteMutex.lock();
     spriteManager.drawSprites(cameraX, cameraY, isExplorerMode);
+    spriteMutex.unlock();
+
 
     // Disable the scissor test to not affect subsequent rendering
     glDisable(GL_SCISSOR_TEST);
@@ -548,7 +560,10 @@ void sendSpriteData(SOCKET sock) {
 
     while (true) {
         data.clear();
+        spriteMutex.lock();
         Sprite* mainSprite = spriteManager.getMainSprite();
+        spriteMutex.unlock();
+
 
         if (!mainSprite) {
             continue;
@@ -598,14 +613,27 @@ void receiveBallData(SOCKET sock) {
                 continue; // Skip parsing errors and continue receiving data
             }
 
-            if (root.isArray()) {
-                ballMutex.lock();
-                BallManager::clearBalls();
-                for (int i = 0; i < root.size(); ++i) {
-                    Ball ball = Ball(root[i]["x"].asFloat(), root[i]["y"].asFloat(), root[i]["velocity"].asFloat(), root[i]["angle"].asFloat());
-                    BallManager::addBall(ball);
+            if (root.isObject()) {
+
+                if (root["type"] == "ball" && root["data"].isArray()) {
+                    ballMutex.lock();
+                    BallManager::clearBalls();
+                    for (const auto& ballData : root["data"]) {
+                        Ball ball = Ball(ballData["x"].asFloat(), ballData["y"].asFloat(), ballData["velocity"].asFloat(), ballData["angle"].asFloat());
+                        BallManager::addBall(ball);
+                    }
+                    ballMutex.unlock();
                 }
-                ballMutex.unlock();
+                else if (root["type"] == "sprite" && root["data"].isArray()) {
+                    spriteMutex.lock();
+                    spriteManager.clearSprites();
+                    for (const auto& spriteData : root["data"]) {
+                        Sprite sprite(spriteData["x"].asFloat(), spriteData["y"].asFloat());
+                        spriteManager.addSprites(sprite);
+                    }
+                    spriteMutex.unlock();
+
+                }
             }
 
             recvbuf.clear();
@@ -726,14 +754,7 @@ int main(int argc, char** argv)
 
     Sprite sprite = Sprite(0, 0);
 
-    //mainSprite = &sprite;
     spriteManager.setMainSprite(&sprite);
-    //spriteManager.addSprites(*mainSprite);
-    spriteManager.addSprites(Sprite(40, 40));
-    // Point p1 = {0, 0};
-    // Point p2 = {0, 720};
-    // Wall w = Wall(p1, p2);
-    // BallManager::addWall(w);
 
     glutKeyboardFunc(keyboard);
 
