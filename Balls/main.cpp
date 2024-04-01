@@ -594,62 +594,65 @@ void receiveBallData(SOCKET sock) {
     std::stringstream ss;
 
     while (true) {
+        // Receive data into the buffer
+        const int bufferSize = 4096; // Adjust buffer size as needed
+        char buffer[bufferSize];
+        int bytesReceived = recv(sock, buffer, bufferSize, 0);
+        if (bytesReceived <= 0) {
+            if (bytesReceived == 0) {
+                std::cout << "Connection closed by server" << std::endl;
+            }
+            else {
+                std::cout << "recv failed: " << WSAGetLastError() << std::endl;
+            }
+            break; // Exit loop on receive error or connection closure
+        }
 
-        //int recvbuflen = sizeof(recvbuf); // Update buffer size
-        int bytesReceived = recv(sock, recvbuf.data(), recvbuf.capacity(), 0);
-        //cout << bytesReceived << ", " << recvbuf << endl;
+        // Append received data to the buffer
+        recvbuf.append(buffer, bytesReceived);
 
-        recvbuf.resize(bytesReceived);
-        recvbuf.push_back('\0');
-        if (bytesReceived > 0) {
+        // Attempt to parse complete JSON objects from the buffer
+        size_t pos;
+        while ((pos = recvbuf.find_first_of("\r\n")) != std::string::npos) {
+            std::string jsonStr = recvbuf.substr(0, pos);
+            recvbuf.erase(0, pos + 1);
 
-            ss.str(recvbuf);
+            ss.str(jsonStr);
             Json::Value root;
             Json::Reader reader;
-            //std::cout << recvbuf << endl;
 
             if (!reader.parse(ss, root, false)) {
                 //std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
-                continue; // Skip parsing errors and continue receiving data
+                continue; // Skip parsing errors and continue with remaining data
             }
 
+            // Process the parsed JSON object
             if (root.isObject()) {
-
-                if (root["type"] == "ball" && root["data"].isArray()) {
-                    ballMutex.lock();
-                    BallManager::clearBalls();
-                    for (const auto& ballData : root["data"]) {
-                        Ball ball = Ball(ballData["x"].asFloat(), ballData["y"].asFloat(), ballData["velocity"].asFloat(), ballData["angle"].asFloat());
-                        BallManager::addBall(ball);
+                if (root.isMember("type") && root["type"].isString() && root.isMember("data") && root["data"].isArray()) {
+                    if (root["type"] == "ball") {
+                        ballMutex.lock();
+                        BallManager::clearBalls();
+                        for (const auto& ballData : root["data"]) {
+                            Ball ball = Ball(ballData["x"].asFloat(), ballData["y"].asFloat(), ballData["velocity"].asFloat(), ballData["angle"].asFloat());
+                            BallManager::addBall(ball);
+                        }
+                        ballMutex.unlock();
                     }
-                    ballMutex.unlock();
-                }
-                else if (root["type"] == "sprite" && root["data"].isArray()) {
-                    spriteMutex.lock();
-                    spriteManager.clearSprites();
-                    for (const auto& spriteData : root["data"]) {
-                        Sprite sprite(spriteData["x"].asFloat(), spriteData["y"].asFloat());
-                        spriteManager.addSprites(sprite);
+                    else if (root["type"] == "sprite") {
+                        spriteMutex.lock();
+                        spriteManager.clearSprites();
+                        for (const auto& spriteData : root["data"]) {
+                            Sprite sprite(spriteData["x"].asFloat(), spriteData["y"].asFloat());
+                            spriteManager.addSprites(sprite);
+                        }
+                        spriteMutex.unlock();
                     }
-                    spriteMutex.unlock();
-
                 }
             }
-
-            recvbuf.clear();
-
-
-        }
-        else if (bytesReceived == 0) {
-            std::cout << "Connection closed by server" << std::endl;
-            break; // Exit loop when server closes the connection
-        }
-        else {
-            std::cout << "recv failed: " << WSAGetLastError() << std::endl;
-            break; // Exit loop on receive error
         }
     }
 }
+
 
 
 static int connectToServer() {
@@ -703,7 +706,7 @@ static int connectToServer() {
     std::thread receiveBallThread(receiveBallData, sock);
     std::thread sendSpriteThread(sendSpriteData, sock);
 
-    //receiveBallThread.join();
+    receiveBallThread.join();
     sendSpriteThread.join();
     closesocket(sock);
     WSACleanup();
