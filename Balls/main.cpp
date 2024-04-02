@@ -555,7 +555,7 @@ void update(int value) {
 }
 
 
-void sendSpriteData(SOCKET sock) {
+void sendSpriteData(SOCKET sock, const std::string& clientId) {
     Json::Value data;
 
     while (true) {
@@ -569,10 +569,7 @@ void sendSpriteData(SOCKET sock) {
             continue;
         }
 
-        // Assuming `getSpriteId` returns the ID of the sprite as a string
-        std::string spriteId = mainSprite->getSpriteId(); // Method to get sprite's ID
-        
-        data["spriteId"] = spriteId; // Include sprite's ID
+        data["clientId"] = clientId; // Use the client ID received from the server
 
         // Construct JSON object representing sprite position
         data["x"] = (*mainSprite).getX();
@@ -580,7 +577,11 @@ void sendSpriteData(SOCKET sock) {
 
         // Convert JSON object to string
         Json::StreamWriterBuilder builder;
+        builder["commentStyle"] = "None";
+        builder["indentation"] = "";  // Empty string means no indentation, compact JSON
         std::string json_string = Json::writeString(builder, data);
+
+        json_string += "\n";
 
         // Send JSON data to the server
         int bytesSent = send(sock, json_string.c_str(), json_string.length(), 0);
@@ -708,8 +709,21 @@ static int connectToServer() {
      char recvbuf[RECV_BUF_SIZE];
      int totalReceived = 0;*/
 
+    char idBuffer[256]; // Buffer to store the ID string received from the server
+    int bytesReceived = recv(sock, idBuffer, sizeof(idBuffer) - 1, 0); // Leave space for null terminator
+    if (bytesReceived <= 0) {
+        // Handle errors or connection closure
+        std::cerr << "Failed to receive ID from server or connection closed.\n";
+        closesocket(sock); // Ensure to close the socket
+        WSACleanup(); // Assuming Winsock is used, perform cleanup
+        return -1; // Exit or handle as appropriate
+    }
+    idBuffer[bytesReceived] = '\0'; // Null-terminate the received data
+    std::string clientId(idBuffer); // Convert received data to a string
+    std::cout << "Received Client ID: " << clientId << std::endl;
+
     std::thread receiveBallThread(receiveBallData, sock);
-    std::thread sendSpriteThread(sendSpriteData, sock);
+    std::thread sendSpriteThread(sendSpriteData, sock, clientId);
 
     receiveBallThread.join();
     sendSpriteThread.join();
