@@ -569,6 +569,11 @@ void sendSpriteData(SOCKET sock) {
             continue;
         }
 
+        // Assuming `getSpriteId` returns the ID of the sprite as a string
+        std::string spriteId = mainSprite->getSpriteId(); // Method to get sprite's ID
+        
+        data["spriteId"] = spriteId; // Include sprite's ID
+
         // Construct JSON object representing sprite position
         data["x"] = (*mainSprite).getX();
         data["y"] = (*mainSprite).getY();
