@@ -575,7 +575,11 @@ void sendSpriteData(SOCKET sock) {
 
         // Convert JSON object to string
         Json::StreamWriterBuilder builder;
+        builder["commentStyle"] = "None";
+        builder["indentation"] = "";  // Empty string means no indentation, compact JSON
         std::string json_string = Json::writeString(builder, data);
+
+        json_string += "\n";
 
         // Send JSON data to the server
         int bytesSent = send(sock, json_string.c_str(), json_string.length(), 0);
