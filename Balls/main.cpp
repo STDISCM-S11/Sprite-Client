@@ -9,6 +9,7 @@
 #include <json/json.h>
 #include <thread>
 #include <mutex>
+#include <string>
 
 #include "imgui.h"
 
@@ -571,6 +572,7 @@ void sendSpriteData(SOCKET sock, const std::string& clientId) {
 
         data["clientId"] = clientId; // Use the client ID received from the server
 
+
         // Construct JSON object representing sprite position
         data["x"] = (*mainSprite).getX();
         data["y"] = (*mainSprite).getY();
@@ -721,6 +723,7 @@ static int connectToServer() {
     idBuffer[bytesReceived] = '\0'; // Null-terminate the received data
     std::string clientId(idBuffer); // Convert received data to a string
     std::cout << "Received Client ID: " << clientId << std::endl;
+    clientId.replace(clientId.end() - 2, clientId.end(), "");
 
     std::thread receiveBallThread(receiveBallData, sock);
     std::thread sendSpriteThread(sendSpriteData, sock, clientId);
