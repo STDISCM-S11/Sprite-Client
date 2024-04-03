@@ -96,9 +96,9 @@ void keyboard(unsigned char key, int x, int y) {
     float cameraSpeed = 5.0f;
 
     //Sprite& currentSprite = SpriteManager::getSprites().front(); // Assuming the controlled sprite is the first one
-    spriteMutex.lock();
+    //spriteMutex.lock();
     Sprite* mainSprite = spriteManager.getMainSprite();
-    spriteMutex.unlock();
+    //spriteMutex.unlock();
 
 
     float spriteX = (*mainSprite).getX();
@@ -153,9 +153,9 @@ void keyboard(unsigned char key, int x, int y) {
 
 void drawBorderLines(float lineWidth, float borderWidth, int numLines) {
 
-    spriteMutex.lock();
+    //spriteMutex.lock();
     Sprite* mainSprite = spriteManager.getMainSprite();
-    spriteMutex.unlock();
+    //spriteMutex.unlock();
 
     //Sprite& mainSprite = SpriteManager::getSprites().front();
     float spriteX = (*mainSprite).getX();
@@ -290,9 +290,9 @@ void display()
     glLoadIdentity();
 
     if (isExplorerMode) {
-        spriteMutex.lock();
+        //spriteMutex.lock();
         Sprite* mainSprite = spriteManager.getMainSprite();
-        spriteMutex.unlock();
+        //spriteMutex.unlock();
 
 
         drawBorderLines(20.0f, 20.0f, 100);
@@ -535,7 +535,7 @@ void update(int value) {
 
     while (accumulator >= targetFrameTime)
     {
-        //BallManager::updateBalls(deltaTime); // Update all balls with the time elapsed
+        BallManager::updateBalls(deltaTime); // Update all balls with the time elapsed
         accumulator -= targetFrameTime;
     }
 
@@ -561,9 +561,7 @@ void sendSpriteData(SOCKET sock, const std::string& clientId) {
 
     while (true) {
         data.clear();
-        spriteMutex.lock();
         Sprite* mainSprite = spriteManager.getMainSprite();
-        spriteMutex.unlock();
 
 
         if (!mainSprite) {
@@ -596,16 +594,13 @@ void sendSpriteData(SOCKET sock, const std::string& clientId) {
     }
 }
 
-
 void receiveBallData(SOCKET sock) {
     std::string recvbuf;
-    std::stringstream ss;
-
     while (true) {
         // Receive data into the buffer
         const int bufferSize = 4096; // Adjust buffer size as needed
         char buffer[bufferSize];
-        int bytesReceived = recv(sock, buffer, bufferSize, 0);
+        int bytesReceived = recv(sock, buffer, bufferSize - 1, 0);
         if (bytesReceived <= 0) {
             if (bytesReceived == 0) {
                 std::cout << "Connection closed by server" << std::endl;
@@ -613,55 +608,51 @@ void receiveBallData(SOCKET sock) {
             else {
                 std::cout << "recv failed: " << WSAGetLastError() << std::endl;
             }
-            break; // Exit loop on receive error or connection closure
+            break;
         }
 
-        // Append received data to the buffer
-        recvbuf.append(buffer, bytesReceived);
-
-        // Attempt to parse complete JSON objects from the buffer
-        size_t pos;
-        while ((pos = recvbuf.find_first_of("\r\n")) != std::string::npos) {
+        buffer[bytesReceived] = '\0';
+        recvbuf.append(buffer);
+        // Process complete JSON messages separated by newline
+        size_t pos = 0;
+        while ((pos = recvbuf.find("\n")) != std::string::npos) {
             std::string jsonStr = recvbuf.substr(0, pos);
-            recvbuf.erase(0, pos + 1);
+            //recvbuf.erase(0, pos + 1);
+            recvbuf.clear();
 
-            ss.str(jsonStr);
             Json::Value root;
             Json::Reader reader;
+            if (reader.parse(jsonStr, root)) {
+                // Process the parsed JSON object here
+                // For example, printing the received JSON string
 
-            if (!reader.parse(ss, root, false)) {
-                //std::cout << "Failed to parse JSON: " << reader.getFormattedErrorMessages() << std::endl;
-                continue; // Skip parsing errors and continue with remaining data
-            }
-
-            // Process the parsed JSON object
-            if (root.isObject()) {
-                if (root.isMember("type") && root["type"].isString() && root.isMember("data") && root["data"].isArray()) {
-                    if (root["type"] == "ball") {
+                if (root.isObject()) {
+                    //cout << root << endl;
+                    if (root["ballData"].size() > 0) {
                         ballMutex.lock();
-                        BallManager::clearBalls();
-                        for (const auto& ballData : root["data"]) {
-                            Ball ball = Ball(ballData["x"].asFloat(), ballData["y"].asFloat(), ballData["velocity"].asFloat(), ballData["angle"].asFloat());
+                        for (const auto& ballData : root["ballData"]) {
+                            Ball ball = Ball(ballData["x"].asFloat(), ballsViewportHeight - ballData["y"].asFloat(), ballData["velocity"].asFloat(), ballData["angle"].asFloat());
                             BallManager::addBall(ball);
                         }
                         ballMutex.unlock();
                     }
-                    else if (root["type"] == "sprite") {
+                    if (root["spriteData"]) {
+
                         spriteMutex.lock();
                         spriteManager.clearSprites();
-                        for (const auto& spriteData : root["data"]) {
+                        for (const auto& spriteData : root["spriteData"]) {
                             Sprite sprite(spriteData["x"].asFloat(), spriteData["y"].asFloat());
                             spriteManager.addSprites(sprite);
                         }
                         spriteMutex.unlock();
                     }
                 }
+
+                //std::cout << "Received JSON: " << jsonStr << std::endl;
             }
         }
     }
 }
-
-
 
 static int connectToServer() {
     WSADATA wsaData;
