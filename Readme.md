@@ -1,6 +1,6 @@
-# Balls is life
+# Balls is life (Client Code)
 
-STDISCM Problem Set # 1
+STDISCM Problem Set # 3
 
 Authors: Janine Chua Ching, Ayisha Dytoc, Faith Griffin, and Tyrone Sta. Maria
 
