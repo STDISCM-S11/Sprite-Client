@@ -80,6 +80,9 @@ const float peripheryHeight = peripheryHeightTiles * peripheryTileSize;
 GLsizei ballsViewportWidth = 1280;
 GLsizei ballsViewportHeight = 720;
 
+float offsetX = 11360.0f;
+float offsetY = 720.0f;
+
 std::mutex ballMutex;
 std::mutex spriteMutex;
 
@@ -110,6 +113,9 @@ void keyboard(unsigned char key, int x, int y) {
             (*mainSprite).setY(ballsViewportHeight);
             break;
         }
+
+        offsetY -= cameraSpeed * 8;
+
         (*mainSprite).moveUp(cameraSpeed);
         // cout << currentSprite.getX() << ", " << currentSprite.getY() << endl;
         break;
@@ -120,6 +126,7 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         }
 
+        offsetY += cameraSpeed * 8;
         (*mainSprite).moveDown(cameraSpeed);
         break;
     case 'a':
@@ -127,10 +134,10 @@ void keyboard(unsigned char key, int x, int y) {
             (*mainSprite).setX(0);
             break;
         }
-        if (spriteX >= ballsViewportWidth - 200) {
-            (*mainSprite).moveLeft(cameraSpeed * 2);
-            break;
-        }
+
+        //if (spriteX >= 1280) offsetX = 1280.0f;
+
+        offsetX += cameraSpeed * 8;
         (*mainSprite).moveLeft(cameraSpeed);
         break;
     case 'd':
@@ -138,13 +145,9 @@ void keyboard(unsigned char key, int x, int y) {
             (*mainSprite).setX(ballsViewportWidth);
             break;
         }
+        //if (spriteX == 1280) offsetX = 1280.0f;
 
-        if (spriteX >= ballsViewportWidth - 200) {
-            (*mainSprite).moveRight(cameraSpeed * 2);
-            break;
-        }
-
-
+        offsetX -= cameraSpeed * 8;
         (*mainSprite).moveRight(cameraSpeed);
         break;
     }
@@ -208,11 +211,11 @@ void drawBorderLines(float lineWidth, float borderWidth, int numLines) {
     }
 
     // cout <<  ballsViewportWidth - numLines << " " << ballsViewportWidth << endl;
-    if (spriteX >= ballsViewportWidth - 150) {
-        for (int i = 0; i < numLines + spriteX - 650; i++) {
+    if (spriteX >= ballsViewportWidth - numLines) {
+        for (int i = 0; i <= offsetX - 300; i++) {
             glBegin(GL_LINES);
-            glVertex2f((ballsViewportWidth - 550) + i, 0.0f);
-            glVertex2f((ballsViewportWidth - 550) + i, ballsViewportHeight);
+            glVertex2f(offsetX - 400 + i, 0.0f);
+            glVertex2f(offsetX - 400+ i, ballsViewportHeight);
 
             glEnd();
         }
@@ -768,7 +771,7 @@ int main(int argc, char** argv)
 
     ImGui_ImplGLUT_InstallFuncs();
 
-    Sprite sprite = Sprite(0, 0);
+    Sprite sprite = Sprite(0,0);
 
     spriteManager.setMainSprite(&sprite);
 
