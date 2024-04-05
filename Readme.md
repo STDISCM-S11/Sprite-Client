@@ -1,6 +1,6 @@
-# Balls is life
+# Balls is life (Client Code)
 
-STDISCM Problem Set # 1
+STDISCM Problem Set # 3
 
 Authors: Janine Chua Ching, Ayisha Dytoc, Faith Griffin, and Tyrone Sta. Maria
 
@@ -17,18 +17,12 @@ Before you begin, ensure you have the following installed on your system:
 ## Step 1: Clone the Repository
 
 ```
-git clone https://github.com/TyroneStaMaria/stdiscm-balls-project.git
+git clone https://github.com/STDISCM-S11/Sprite-Client/tree/main
 ```
 
 or download as a ZIP file and extract it
 
-## Step 2: Checkout Branch
-
-```
-git checkout problem-set-2-final
-```
-
-## Step 3: Open the Project
+## Step 2: Open the Project
 
 Using Visual Studio
 
@@ -41,7 +35,7 @@ If you prefer not to use the solution file:
 2. Select `File > Open > Project/Solution` and navigate to the `Balls/` directory.
 3. Choose `Balls.sln` to load the project.
 
-## Step 4: Build and Run
+## Step 3: Build and Run
 
 To build and run the project:
 
