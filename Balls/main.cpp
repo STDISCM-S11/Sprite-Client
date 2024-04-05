@@ -480,7 +480,7 @@ void display()
         ImGui::Separator();
         ImGui::Spacing();
 
-        ImGui::Text("FPS: (%.1f FPS)", 1000.0f / calculatedFrameRate, calculatedFrameRate);
+        ImGui::Text("FPS: (%.1f FPS)",  calculatedFrameRate);
         ballMutex.lock();
         //ImGui::Text("Number of balls: %zu", BallManager::getBalls().size());
         ballMutex.unlock();
@@ -679,7 +679,7 @@ static int connectToServer() {
         return 1;
     }
 
-    if (inet_pton(AF_INET, "127.0.0.1", &server.sin_addr) <= 0)
+    if (inet_pton(AF_INET, "192.168.43.168", &server.sin_addr) <= 0)
     {
         std::cerr << "Invalid address/ Address not supported \n";
         closesocket(sock);
