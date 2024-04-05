@@ -597,7 +597,7 @@ void sendSpriteData(SOCKET sock, const std::string& clientId) {
     }
 }
 
-void receiveBallData(SOCKET sock) {
+void receiveBallData(SOCKET sock, string clientId) {
     std::string recvbuf;
     while (true) {
         // Receive data into the buffer
@@ -644,8 +644,10 @@ void receiveBallData(SOCKET sock) {
                         spriteMutex.lock();
                         spriteManager.clearSprites();
                         for (const auto& spriteData : root["spriteData"]) {
-                            Sprite sprite(spriteData["x"].asFloat(), spriteData["y"].asFloat());
-                            spriteManager.addSprites(sprite);
+                            if (spriteData["uuid"] != clientId) {
+                                Sprite sprite(spriteData["x"].asFloat(), spriteData["y"].asFloat());
+                                spriteManager.addSprites(sprite);
+                            }
                         }
                         spriteMutex.unlock();
                     }
@@ -719,7 +721,7 @@ static int connectToServer() {
     std::cout << "Received Client ID: " << clientId << std::endl;
     clientId.replace(clientId.end() - 2, clientId.end(), "");
 
-    std::thread receiveBallThread(receiveBallData, sock);
+    std::thread receiveBallThread(receiveBallData, sock, clientId);
     std::thread sendSpriteThread(sendSpriteData, sock, clientId);
 
     receiveBallThread.join();
