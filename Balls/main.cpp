@@ -601,7 +601,7 @@ void receiveBallData(SOCKET sock, string clientId) {
     std::string recvbuf;
     while (true) {
         // Receive data into the buffer
-        const int bufferSize = 4096; // Adjust buffer size as needed
+        const int bufferSize = 4096 * 2; // Adjust buffer size as needed
         char buffer[bufferSize];
         int bytesReceived = recv(sock, buffer, bufferSize - 1, 0);
         if (bytesReceived <= 0) {
@@ -630,7 +630,7 @@ void receiveBallData(SOCKET sock, string clientId) {
                 // For example, printing the received JSON string
 
                 if (root.isObject()) {
-                    //cout << root << endl;
+                    cout << root["ballData"].size() << endl;
                     if (root["ballData"].size() > 0) {
                         ballMutex.lock();
                         for (const auto& ballData : root["ballData"]) {
@@ -681,7 +681,7 @@ static int connectToServer() {
         return 1;
     }
 
-    if (inet_pton(AF_INET, "192.168.43.168", &server.sin_addr) <= 0)
+    if (inet_pton(AF_INET, "127.0.0.1", &server.sin_addr) <= 0)
     {
         std::cerr << "Invalid address/ Address not supported \n";
         closesocket(sock);
