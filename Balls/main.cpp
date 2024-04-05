@@ -477,9 +477,9 @@ void display()
         ImGui::Separator();
         ImGui::Spacing();
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / calculatedFrameRate, calculatedFrameRate);
+        ImGui::Text("FPS: (%.1f FPS)", 1000.0f / calculatedFrameRate, calculatedFrameRate);
         ballMutex.lock();
-        ImGui::Text("Number of balls: %zu", BallManager::getBalls().size());
+        //ImGui::Text("Number of balls: %zu", BallManager::getBalls().size());
         ballMutex.unlock();
         ImGui::GetFont()->Scale = oldSize;
         ImGui::PopFont();
